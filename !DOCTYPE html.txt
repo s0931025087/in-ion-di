@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำนวณภาษีมูลค่าเพิ่ม (VAT) | ตราภาษี</title>
+<meta name="description" content="เครื่องมือคำนวณภาษีมูลค่าเพิ่ม (VAT) แยกตามประเภทสินค้าที่ต้องเสียภาษีและสินค้าที่ยกเว้นภาษี">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Sarabun:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --black: #0a0a0b;
+    --black-soft: #121214;
+    --card: #17171a;
+    --card-border: #2a2a2e;
+    --gold: #c9a227;
+    --gold-bright: #e9d18b;
+    --gold-dim: #8a6f22;
+    --blue: #5b8def;
+    --blue-dim: #3a5da3;
+    --white: #f6f4ee;
+    --grey: #9b9892;
+    --grey-dim: #625f5a;
+    --green: #6fae7a;
+    --red: #c46a5e;
+    --radius: 2px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--black);
+    color:var(--gold-bright);
+    font-family:'Sarabun', sans-serif;
+    font-weight:400;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--gold); color:var(--black); }
+
+  h1, h2, h3, .display{
+    font-family:'Noto Serif Thai', serif;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  a{ color:inherit; }
+
+  .wrap{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- Texture ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(10,10,11,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--card-border);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 28px;
+    max-width:960px; margin:0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Noto Serif Thai', serif; font-weight:700; font-size:20px;
+    letter-spacing:0.02em;
+    color:var(--blue);
+  }
+  .logo .mark{
+    width:26px; height:26px;
+    border:1px solid var(--gold);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--gold);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    font-weight:600;
+  }
+  .nav .tag{
+    font-size:12px; color:var(--grey); letter-spacing:0.08em;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:96px 0 72px;
+    border-bottom:1px solid var(--card-border);
+    position:relative;
+  }
+  .hero .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:22px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .hero .eyebrow::before{
+    content:""; width:24px; height:1px; background:var(--gold);
+  }
+  .hero h1{
+    font-size:clamp(34px, 5.4vw, 56px);
+    line-height:1.28;
+    max-width:760px;
+    color:var(--blue);
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--gold-bright);
+  }
+  .hero p{
+    margin-top:24px;
+    max-width:520px;
+    color:var(--grey);
+    font-size:16px;
+  }
+  .hero .rate-badge{
+    margin-top:36px;
+    display:inline-flex; align-items:baseline; gap:10px;
+    border:1px solid var(--card-border);
+    padding:10px 18px;
+    border-radius:999px;
+  }
+  .hero .rate-badge .num{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--gold-bright);
+    font-size:18px; font-weight:600;
+  }
+  .hero .rate-badge .label{
+    font-size:13px; color:var(--grey);
+  }
+
+  /* ---------- Section shared ---------- */
+  section{ padding:72px 0; border-bottom:1px solid var(--card-border); }
+  .section-head{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:24px; margin-bottom:36px; flex-wrap:wrap;
+  }
+  .section-head .num{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--gold-dim);
+    font-size:13px;
+    letter-spacing:0.1em;
+  }
+  .section-head h2{
+    font-size:clamp(24px, 3.2vw, 32px);
+    color:var(--blue);
+    margin-top:6px;
+  }
+  .section-head p{ color:var(--grey); font-size:14px; max-width:340px; }
+
+  /* ---------- Table ---------- */
+  .rate-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:15px;
+  }
+  .rate-table thead th{
+    text-align:left;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--grey);
+    padding:0 0 14px;
+    border-bottom:1px solid var(--gold-dim);
+    font-weight:500;
+  }
+  .rate-table thead th:last-child, .rate-table tbody td:last-child{ text-align:right; }
+  .rate-table tbody td{
+    padding:16px 0;
+    border-bottom:1px solid var(--card-border);
+    vertical-align:middle;
+  }
+  .rate-table tbody tr:hover td{ background:rgba(201,162,39,0.04); }
+  .item-name{ color:var(--gold-bright); font-weight:500; }
+  .item-desc{ color:var(--grey-dim); font-size:13px; margin-top:3px; }
+  .pill{
+    display:inline-flex; align-items:center; gap:7px;
+    padding:5px 12px;
+    border-radius:999px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.03em;
+  }
+  .pill.taxed{ border:1px solid var(--gold-dim); color:var(--gold-bright); }
+  .pill.exempt{ border:1px solid #3a4a3d; color:var(--green); }
+  .pill .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .rate-cell{ font-family:'IBM Plex Mono', monospace; color:var(--gold-bright); font-weight:600; }
+
+  /* ---------- Calculator ---------- */
+  .calc-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:var(--card-border);
+    border:1px solid var(--card-border);
+  }
+  @media (max-width:720px){ .calc-grid{ grid-template-columns:1fr; } }
+
+  .calc-panel, .result-panel{
+    background:var(--card);
+    padding:36px;
+  }
+
+  .field{ margin-bottom:24px; }
+  .field label{
+    display:block; font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--grey); margin-bottom:10px; font-family:'IBM Plex Mono', monospace;
+  }
+  .field input, .field select{
+    width:100%;
+    background:var(--black-soft);
+    border:1px solid var(--card-border);
+    color:var(--gold-bright);
+    padding:13px 14px;
+    font-size:16px;
+    font-family:'Sarabun', sans-serif;
+    border-radius:var(--radius);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--gold); }
+  .field input::placeholder{ color:var(--grey-dim); }
+
+  .toggle-row{ display:flex; gap:10px; }
+  .toggle-btn{
+    flex:1;
+    padding:12px 10px;
+    text-align:center;
+    border:1px solid var(--card-border);
+    background:var(--black-soft);
+    color:var(--grey);
+    font-size:13px;
+    cursor:pointer;
+    border-radius:var(--radius);
+    font-family:'IBM Plex Mono', monospace;
+    transition:all .15s ease;
+  }
+  .toggle-btn.active{
+    border-color:var(--gold);
+    color:var(--gold-bright);
+    background:rgba(201,162,39,0.08);
+  }
+  .toggle-btn:focus-visible, button:focus-visible, input:focus-visible{
+    outline:2px solid var(--gold-bright); outline-offset:2px;
+  }
+
+  .hint{ font-size:12px; color:var(--grey-dim); margin-top:8px; }
+  .hint.match-exempt{ color:var(--green); }
+  .hint.match-taxed{ color:var(--gold-bright); }
+
+  .calc-btn{
+    width:100%;
+    padding:15px;
+    margin-top:8px;
+    background:var(--gold);
+    color:var(--black);
+    border:none;
+    font-family:'Noto Serif Thai', serif;
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    border-radius:var(--radius);
+    transition:background .15s ease, transform .1s ease;
+  }
+  .calc-btn:hover{ background:var(--gold-bright); }
+  .calc-btn:active{ transform:scale(0.99); }
+
+  /* ---------- Result panel ---------- */
+  .result-panel{
+    display:flex; flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+  .result-empty{
+    margin:auto; text-align:center; color:var(--grey-dim); font-size:14px; max-width:220px;
+  }
+  .result-empty .glyph{ font-size:28px; color:var(--gold-dim); margin-bottom:14px; font-family:'Noto Serif Thai',serif; }
+
+  .result-body{ display:none; }
+  .result-body.show{ display:block; animation:fadeUp .35s ease; }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .result-item-name{ font-size:14px; color:var(--grey); margin-bottom:4px; }
+  .result-item-title{ font-family:'Noto Serif Thai', serif; font-size:22px; color:var(--blue); margin-bottom:26px; }
+
+  .result-line{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid var(--card-border);
+    font-size:14px;
+  }
+  .result-line .rl-label{ color:var(--grey); }
+  .result-line .rl-value{ font-family:'IBM Plex Mono', monospace; color:var(--gold-bright); }
+  .result-line.total{ border-bottom:none; padding-top:20px; }
+  .result-line.total .rl-label{ color:var(--blue); font-size:15px; }
+  .result-line.total .rl-value{ color:var(--gold-bright); font-size:24px; font-weight:600; }
+
+  /* seal */
+  .seal{
+    position:absolute; top:30px; right:30px;
+    width:78px; height:78px;
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    color:var(--gold-bright);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    line-height:1.25;
+    transform:scale(0) rotate(-18deg);
+    opacity:0;
+    background:radial-gradient(circle at 35% 30%, rgba(201,162,39,0.14), transparent 70%);
+  }
+  .seal.stamp{ animation:stampIn .5s cubic-bezier(.2,1.6,.4,1) forwards; }
+  .seal::before{
+    content:"";
+    position:absolute; inset:6px;
+    border:1px solid var(--gold-dim);
+    border-radius:50%;
+  }
+  @keyframes stampIn{
+    0%{ transform:scale(2.6) rotate(-18deg); opacity:0; }
+    55%{ transform:scale(0.92) rotate(-14deg); opacity:1; }
+    75%{ transform:scale(1.06) rotate(-16deg); }
+    100%{ transform:scale(1) rotate(-15deg); opacity:1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .result-body.show{ animation:none; }
+    .seal.stamp{ animation:none; transform:scale(1) rotate(-15deg); opacity:1; }
+  }
+
+  /* ---------- About / notes ---------- */
+  .notes{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  @media (max-width:720px){ .notes{ grid-template-columns:1fr; } }
+  .note{ border-top:1px solid var(--gold-dim); padding-top:16px; }
+  .note .n-idx{ font-family:'IBM Plex Mono', monospace; color:var(--gold-dim); font-size:12px; }
+  .note h3{ font-size:16px; margin:8px 0 8px; color:var(--blue); font-weight:600; }
+  .note p{ font-size:13.5px; color:var(--grey); }
+
+  footer{ padding:40px 0 60px; }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  footer p{ font-size:12.5px; color:var(--grey-dim); }
+  footer .mono{ font-size:12px; color:var(--grey-dim); }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header>
+  <div class="nav">
+    <div class="logo"><span class="mark">7%</span> ตราภาษี</div>
+    <div class="tag">เครื่องมือคำนวณภาษีมูลค่าเพิ่ม</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">ภาษีมูลค่าเพิ่ม (VAT)</div>
+    <h1>คำนวณภาษีมูลค่าเพิ่ม<br>ให้ <em>แม่นยำ</em> ทุกรายการสินค้า</h1>
+    <p>แยกประเภทสินค้าที่ต้องเสียภาษีมูลค่าเพิ่มและสินค้าที่ได้รับการยกเว้น พร้อมเครื่องมือคำนวณยอดสุทธิแบบทันที</p>
+    <div class="rate-badge">
+      <span class="num">7%</span>
+      <span class="label">อัตราภาษีมูลค่าเพิ่มมาตรฐานของสินค้าทั่วไป</span>
+    </div>
+  </div>
+</section>
+
+<section id="table">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="num">01 — รายการสินค้า</div>
+        <h2>แยกประเภทสินค้าตามภาษีมูลค่าเพิ่ม</h2>
+      </div>
+      <p>สินค้าคิดภาษีเสีย VAT 7% ส่วนสินค้ายกเว้นภาษีไม่ต้องคำนวณ VAT เพิ่ม</p>
+    </div>
+
+    <table class="rate-table">
+      <thead>
+        <tr><th>รายการสินค้า</th><th>สถานะ</th><th>อัตรา VAT</th></tr>
+      </thead>
+      <tbody id="rate-table-body">
+        <!-- populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="calculator">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="num">02 — เครื่องมือคำนวณ</div>
+        <h2>คำนวณยอดสุทธิ</h2>
+      </div>
+      <p>กรอกชื่อสินค้าและราคา ระบบจะตรวจสอบประเภทให้อัตโนมัติจากรายการด้านบน</p>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-panel">
+        <div class="field">
+          <label for="item-name">ชื่อสินค้า</label>
+          <input id="item-name" type="text" placeholder="เช่น เนื้อวัว, สินค้าแปรรูป" autocomplete="off">
+          <div class="hint" id="match-hint">พิมพ์ชื่อสินค้าเพื่อตรวจสอบประเภทอัตโนมัติ</div>
+        </div>
+
+        <div class="field">
+          <label for="item-price">ราคาสินค้า (บาท)</label>
+          <input id="item-price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label>ประเภทภาษี</label>
+          <div class="toggle-row">
+            <div class="toggle-btn active" id="btn-taxed" data-mode="taxed">คิดภาษี 7%</div>
+            <div class="toggle-btn" id="btn-exempt" data-mode="exempt">ยกเว้นภาษี</div>
+          </div>
+        </div>
+
+        <button class="calc-btn" id="calc-btn">คำนวณภาษี</button>
+      </div>
+
+      <div class="result-panel">
+        <div class="result-empty" id="result-empty">
+          <div class="glyph">7%</div>
+          กรอกข้อมูลสินค้าแล้วกดคำนวณ<br>เพื่อดูยอดสุทธิ
+        </div>
+
+        <div class="result-body" id="result-body">
+          <div class="seal" id="seal">VAT<br><span id="seal-text">7%</span></div>
+          <div class="result-item-name">รายการ</div>
+          <div class="result-item-title" id="res-name">—</div>
+
+          <div class="result-line">
+            <span class="rl-label">ราคาก่อนภาษี</span>
+            <span class="rl-value mono" id="res-base">0.00 บาท</span>
+          </div>
+          <div class="result-line">
+            <span class="rl-label">ภาษีมูลค่าเพิ่ม</span>
+            <span class="rl-value mono" id="res-vat">0.00 บาท</span>
+          </div>
+          <div class="result-line total">
+            <span class="rl-label">ยอดสุทธิ</span>
+            <span class="rl-value mono" id="res-total">0.00 บาท</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="num">03 — ข้อควรทราบ</div>
+        <h2>หลักการคำนวณ</h2>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="note">
+        <div class="n-idx">ก.</div>
+        <h3>สินค้าคิดภาษี</h3>
+        <p>สินค้าทั่วไปและสินค้าแปรรูปต้องเสียภาษีมูลค่าเพิ่มในอัตรา 7% ของราคาสินค้า</p>
+      </div>
+      <div class="note">
+        <div class="n-idx">ข.</div>
+        <h3>สินค้ายกเว้นภาษี</h3>
+        <p>เนื้อสัตว์สด เช่น เนื้อวัว เนื้อหมู ไข่ และไก่ ได้รับการยกเว้นภาษีมูลค่าเพิ่มตามกฎหมาย</p>
+      </div>
+      <div class="note">
+        <div class="n-idx">ค.</div>
+        <h3>สูตรคำนวณ</h3>
+        <p>ยอดสุทธิ = ราคาสินค้า + (ราคาสินค้า × อัตราภาษี) เมื่อเป็นสินค้ายกเว้น ยอดสุทธิเท่ากับราคาสินค้า</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>ตราภาษี — เครื่องมือคำนวณภาษีมูลค่าเพิ่มอย่างง่าย</p>
+    <p class="mono">VAT RATE: 7.00%</p>
+  </div>
+</footer>
+
+<script>
+  // ---------- Data: แก้ไข/เพิ่มรายการสินค้าได้ที่นี่ ----------
+  const VAT_RATE = 0.07;
+
+  const ITEMS = [
+    { name: "สินค้า และสินค้าแปรรูป", desc: "สินค้าทั่วไปและสินค้าที่ผ่านกระบวนการแปรรูป", taxed: true },
+    { name: "เนื้อสัตว์", desc: "เนื้อสัตว์สดทุกชนิด", taxed: false },
+    { name: "ไข่", desc: "ไข่สดทุกชนิด", taxed: false },
+    { name: "ไก่", desc: "เนื้อไก่สด", taxed: false },
+    { name: "หมู", desc: "เนื้อหมูสด", taxed: false },
+    { name: "เนื้อวัว", desc: "เนื้อวัวสด", taxed: false },
+  ];
+
+  // ---------- Render table ----------
+  const tbody = document.getElementById('rate-table-body');
+  ITEMS.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+      </td>
+      <td>
+        <span class="pill ${item.taxed ? 'taxed' : 'exempt'}">
+          <span class="dot"></span>${item.taxed ? 'คิดภาษี' : 'ยกเว้นภาษี'}
+        </span>
+      </td>
+      <td class="rate-cell">${item.taxed ? (VAT_RATE * 100).toFixed(0) + '%' : '0%'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // ---------- Calculator logic ----------
+  const nameInput = document.getElementById('item-name');
+  const priceInput = document.getElementById('item-price');
+  const hint = document.getElementById('match-hint');
+  const btnTaxed = document.getElementById('btn-taxed');
+  const btnExempt = document.getElementById('btn-exempt');
+  const calcBtn = document.getElementById('calc-btn');
+
+  const resultEmpty = document.getElementById('result-empty');
+  const resultBody = document.getElementById('result-body');
+  const seal = document.getElementById('seal');
+  const sealText = document.getElementById('seal-text');
+  const resName = document.getElementById('res-name');
+  const resBase = document.getElementById('res-base');
+  const resVat = document.getElementById('res-vat');
+  const resTotal = document.getElementById('res-total');
+
+  let mode = 'taxed'; // 'taxed' | 'exempt'
+  let userOverrode = false;
+
+  function setMode(newMode, fromUser){
+    mode = newMode;
+    btnTaxed.classList.toggle('active', mode === 'taxed');
+    btnExempt.classList.toggle('active', mode === 'exempt');
+    if (fromUser) userOverrode = true;
+  }
+
+  btnTaxed.addEventListener('click', () => setMode('taxed', true));
+  btnExempt.addEventListener('click', () => setMode('exempt', true));
+
+  nameInput.addEventListener('input', () => {
+    const q = nameInput.value.trim();
+    if (!q){
+      hint.textContent = 'พิมพ์ชื่อสินค้าเพื่อตรวจสอบประเภทอัตโนมัติ';
+      hint.className = 'hint';
+      return;
+    }
+    const match = ITEMS.find(i => i.name.includes(q) || q.includes(i.name));
+    if (match){
+      hint.textContent = `พบในรายการ: ${match.name} — ${match.taxed ? 'คิดภาษี 7%' : 'ยกเว้นภาษี'}`;
+      hint.className = 'hint ' + (match.taxed ? 'match-taxed' : 'match-exempt');
+      if (!userOverrode) setMode(match.taxed ? 'taxed' : 'exempt', false);
+    } else {
+      hint.textContent = 'ไม่พบในรายการ — เลือกประเภทภาษีด้วยตนเองด้านล่าง';
+      hint.className = 'hint';
+    }
+  });
+
+  // reset override once name field is cleared
+  nameInput.addEventListener('focus', () => { userOverrode = false; });
+
+  function formatBaht(n){
+    return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' บาท';
+  }
+
+  calcBtn.addEventListener('click', () => {
+    const price = parseFloat(priceInput.value);
+    const name = nameInput.value.trim() || 'สินค้าไม่ระบุชื่อ';
+
+    if (isNaN(price) || price < 0){
+      priceInput.focus();
+      priceInput.style.borderColor = 'var(--red)';
+      setTimeout(() => { priceInput.style.borderColor = ''; }, 900);
+      return;
+    }
+
+    const isTaxed = mode === 'taxed';
+    const vatAmount = isTaxed ? price * VAT_RATE : 0;
+    const total = price + vatAmount;
+
+    resName.textContent = name;
+    resBase.textContent = formatBaht(price);
+    resVat.textContent = (isTaxed ? '+ ' : '') + formatBaht(vatAmount);
+    resTotal.textContent = formatBaht(total);
+    sealText.textContent = isTaxed ? '7%' : 'FREE';
+
+    resultEmpty.style.display = 'none';
+    resultBody.classList.add('show');
+
+    seal.classList.remove('stamp');
+    void seal.offsetWidth; // restart animation
+    seal.classList.add('stamp');
+  });
+
+  priceInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') calcBtn.click();
+  });
+</script>
+
+</body>
+</html>
