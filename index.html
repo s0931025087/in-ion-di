@@ -362,6 +362,143 @@
   footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
   footer p{ font-size:12.5px; color:var(--grey-dim); }
   footer .mono{ font-size:12px; color:var(--grey-dim); }
+
+  /* ---------- Certificate form (ใบรับรองแทนใบเสร็จรับเงิน) ---------- */
+  .cert-card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    padding:36px;
+  }
+  .cert-field{ margin-bottom:22px; }
+  .cert-field label{
+    display:block; font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--grey); margin-bottom:10px; font-family:'IBM Plex Mono', monospace;
+  }
+  .cert-field input{
+    width:100%;
+    background:var(--black-soft);
+    border:1px solid var(--card-border);
+    color:var(--gold-bright);
+    padding:12px 14px;
+    font-size:15px;
+    font-family:'Sarabun', sans-serif;
+    border-radius:var(--radius);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .cert-field input:focus{ border-color:var(--gold); }
+  .cert-field input::placeholder{ color:var(--grey-dim); }
+
+  .cert-row2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:640px){ .cert-row2{ grid-template-columns:1fr; } }
+
+  .cert-table-wrap{ overflow-x:auto; margin-bottom:10px; }
+  .cert-table{ width:100%; border-collapse:collapse; min-width:620px; }
+  .cert-table th{
+    text-align:left;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--grey);
+    padding:0 8px 10px 0;
+    border-bottom:1px solid var(--gold-dim);
+    font-weight:500;
+  }
+  .cert-table td{ padding:6px 8px 6px 0; vertical-align:middle; }
+  .cert-table input{
+    width:100%;
+    background:var(--black-soft);
+    border:1px solid var(--card-border);
+    color:var(--gold-bright);
+    padding:9px 10px;
+    font-size:14px;
+    font-family:'Sarabun', sans-serif;
+    border-radius:var(--radius);
+    outline:none;
+  }
+  .cert-table input:focus{ border-color:var(--gold); }
+  .cert-table .row-amount{ font-family:'IBM Plex Mono', monospace; text-align:right; }
+  .cert-row-remove{
+    background:none; border:none; color:var(--grey-dim); cursor:pointer;
+    font-size:16px; line-height:1; padding:6px; transition:color .15s ease;
+  }
+  .cert-row-remove:hover{ color:var(--red); }
+
+  .cert-add-row{
+    background:none;
+    border:1px dashed var(--card-border);
+    color:var(--grey);
+    padding:10px 16px;
+    font-size:13px;
+    font-family:'IBM Plex Mono', monospace;
+    cursor:pointer;
+    border-radius:var(--radius);
+    width:100%;
+    margin-bottom:28px;
+    transition:all .15s ease;
+  }
+  .cert-add-row:hover{ border-color:var(--gold); color:var(--gold-bright); }
+
+  .cert-total-row{
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid var(--gold-dim);
+    padding-top:18px; margin-bottom:28px;
+    flex-wrap:wrap; gap:10px;
+  }
+  .cert-total-text{ font-size:12.5px; color:var(--grey-dim); max-width:360px; }
+  .cert-total-num{ font-family:'IBM Plex Mono', monospace; color:var(--gold-bright); font-size:22px; font-weight:600; }
+
+  .cert-print-btn{
+    width:100%;
+    padding:15px;
+    background:var(--gold);
+    color:var(--black);
+    border:none;
+    font-family:'Noto Serif Thai', serif;
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    border-radius:var(--radius);
+    transition:background .15s ease, transform .1s ease;
+  }
+  .cert-print-btn:hover{ background:var(--gold-bright); }
+  .cert-print-btn:active{ transform:scale(0.99); }
+
+  /* Printable document — hidden on screen, shown only when printing */
+  #print-certificate{ display:none; }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #print-certificate, #print-certificate *{ visibility:visible; }
+    #print-certificate{
+      display:block;
+      position:absolute; top:0; left:0;
+      width:100%;
+      background:#fff;
+      color:#000;
+      font-family:'Sarabun', sans-serif;
+      padding:28px 36px;
+    }
+    .pc-title{ text-align:center; font-family:'Noto Serif Thai', serif; font-weight:700; font-size:20px; margin-bottom:26px; }
+    .pc-buyer{ margin-bottom:14px; font-size:14.5px; }
+    .pc-buyer .u{ border-bottom:1px dotted #000; padding:0 4px; }
+    table.pc-table{ width:100%; border-collapse:collapse; margin-bottom:14px; }
+    table.pc-table th, table.pc-table td{ border:1px solid #000; padding:6px 8px; font-size:13px; }
+    table.pc-table th{ text-align:center; font-weight:600; }
+    table.pc-table td.amt{ text-align:right; }
+    table.pc-table tbody tr{ height:26px; }
+    .pc-total-row{ display:flex; justify-content:space-between; border:1px solid #000; border-top:none; margin-top:-14px; margin-bottom:18px; font-size:13.5px; }
+    .pc-total-row span{ padding:7px 10px; }
+    .pc-total-row .pc-text{ flex:1; text-align:center; border-right:1px solid #000; }
+    .pc-signer{ font-size:14px; margin-bottom:6px; }
+    .pc-signer .u{ border-bottom:1px dotted #000; padding:0 4px; }
+    .pc-cert-text{ font-size:13.5px; margin:10px 0 30px; line-height:1.9; }
+    .pc-sign-block{ margin-top:50px; font-size:14px; }
+    .pc-sign-line{ margin-bottom:46px; }
+    .pc-sign-line .line{ display:inline-block; min-width:220px; border-bottom:1px dotted #000; margin-right:8px; }
+  }
 </style>
 </head>
 <body>
@@ -499,6 +636,100 @@
   </div>
 </section>
 
+<section id="certificate">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="num">04 — เอกสาร</div>
+        <h2>ใบรับรองแทนใบเสร็จรับเงิน</h2>
+      </div>
+      <p>สำหรับกรณีจ่ายเงินแล้วไม่สามารถขอใบเสร็จรับเงินจากผู้ขายได้ กรอกข้อมูลแล้วพิมพ์เอกสารได้ทันที</p>
+    </div>
+
+    <div class="cert-card">
+      <div class="cert-field">
+        <label for="cert-company">บจ. / หจก. (ผู้ซื้อ / ผู้รับบริการ)</label>
+        <input id="cert-company" type="text" placeholder="ชื่อบริษัท หรือ ห้างหุ้นส่วนจำกัด">
+      </div>
+
+      <div class="cert-table-wrap">
+        <table class="cert-table">
+          <thead>
+            <tr>
+              <th style="width:16%">วัน เดือน ปี</th>
+              <th style="width:44%">รายละเอียดรายจ่าย</th>
+              <th style="width:18%">จำนวนเงิน</th>
+              <th style="width:18%">หมายเหตุ</th>
+              <th style="width:4%"></th>
+            </tr>
+          </thead>
+          <tbody id="cert-rows"><!-- populated by JS --></tbody>
+        </table>
+      </div>
+      <button class="cert-add-row" id="cert-add-row" type="button">+ เพิ่มรายการ</button>
+
+      <div class="cert-total-row">
+        <div class="cert-total-text" id="cert-total-text">( ศูนย์บาทถ้วน )</div>
+        <div><span class="mono" style="color:var(--grey); font-size:12px; margin-right:10px;">รวมทั้งสิ้น</span><span class="cert-total-num mono" id="cert-total-num">0.00</span></div>
+      </div>
+
+      <div class="cert-row2">
+        <div class="cert-field">
+          <label for="cert-payer">ข้าพเจ้า (ผู้เบิกจ่าย)</label>
+          <input id="cert-payer" type="text" placeholder="ชื่อ-นามสกุล">
+        </div>
+        <div class="cert-field">
+          <label for="cert-position">ตำแหน่ง</label>
+          <input id="cert-position" type="text" placeholder="ตำแหน่ง">
+        </div>
+      </div>
+
+      <div class="cert-row2">
+        <div class="cert-field">
+          <label for="cert-date-from">ตั้งแต่วันที่</label>
+          <input id="cert-date-from" type="date">
+        </div>
+        <div class="cert-field">
+          <label for="cert-date-to">ถึงวันที่</label>
+          <input id="cert-date-to" type="date">
+        </div>
+      </div>
+
+      <button class="cert-print-btn" id="cert-print-btn" type="button">พิมพ์ใบรับรอง</button>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Printable certificate (visible only on print) ---------- -->
+<div id="print-certificate">
+  <div class="pc-title">ใบรับรองแทนใบเสร็จรับเงิน</div>
+  <div class="pc-buyer">บจ. / หจก. <span class="u" id="pc-company">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> (ผู้ซื้อ/ผู้รับบริการ)</div>
+
+  <table class="pc-table">
+    <thead>
+      <tr><th style="width:14%">วัน เดือน ปี</th><th style="width:42%">รายละเอียดรายจ่าย</th><th style="width:22%">จำนวนเงิน</th><th style="width:22%">หมายเหตุ</th></tr>
+    </thead>
+    <tbody id="pc-rows"><!-- populated by JS --></tbody>
+  </table>
+
+  <div class="pc-total-row">
+    <span class="pc-text" id="pc-total-text">( ศูนย์บาทถ้วน )</span>
+    <span>รวมทั้งสิ้น&nbsp;&nbsp;<strong id="pc-total-num">-</strong></span>
+  </div>
+
+  <div class="pc-signer">ข้าพเจ้า <span class="u" id="pc-payer">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> (ผู้เบิกจ่าย) &nbsp;&nbsp;ตำแหน่ง <span class="u" id="pc-position">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+  <div class="pc-cert-text">
+    ขอรับรองว่า รายจ่ายข้างต้นนี้ไม่อาจเรียกเก็บใบเสร็จรับเงินจากผู้ขายได้ และข้าพเจ้าได้จ่ายไปในนามของทางบริษัท/ห้างหุ้นส่วนจำกัด
+    โดยตั้งแต่วันที่ <span class="u" id="pc-date-from">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    ถึงวันที่ <span class="u" id="pc-date-to">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+  </div>
+
+  <div class="pc-sign-block">
+    <div class="pc-sign-line">ลงชื่อ <span class="line"></span> (ผู้เบิกจ่าย)</div>
+    <div class="pc-sign-line">ลงชื่อ <span class="line"></span> (ผู้อนุมัติ)</div>
+  </div>
+</div>
+
 <footer>
   <div class="wrap">
     <p>ตราภาษี — เครื่องมือคำนวณภาษีมูลค่าเพิ่มอย่างง่าย</p>
@@ -624,6 +855,149 @@
 
   priceInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') calcBtn.click();
+  });
+
+  // ---------- Thai baht text converter ----------
+  function thaiBahtText(number){
+    number = Math.abs(Number(number) || 0);
+    const numText = ["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"];
+    const digitText = ["","สิบ","ร้อย","พัน","หมื่น","แสน"];
+
+    function convertGroup(numStr){
+      let result = '';
+      const len = numStr.length;
+      for (let i = 0; i < len; i++){
+        const digit = parseInt(numStr[i], 10);
+        const place = len - i - 1;
+        if (digit === 0) continue;
+        if (place === 0){
+          result += (digit === 1 && len > 1) ? 'เอ็ด' : numText[digit];
+        } else if (place === 1){
+          result += (digit === 1) ? 'สิบ' : (digit === 2) ? 'ยี่สิบ' : numText[digit] + 'สิบ';
+        } else {
+          result += numText[digit] + digitText[place];
+        }
+      }
+      return result;
+    }
+
+    function convertInt(n){
+      n = Math.floor(n);
+      if (n === 0) return 'ศูนย์';
+      let numStr = n.toString();
+      const groups = [];
+      while (numStr.length > 6){
+        groups.unshift(numStr.slice(-6));
+        numStr = numStr.slice(0, -6);
+      }
+      groups.unshift(numStr);
+      return groups.map(convertGroup).join('ล้าน');
+    }
+
+    const intPart = Math.floor(number);
+    const decPart = Math.round((number - intPart) * 100);
+
+    let text = convertInt(intPart) + 'บาท';
+    text += decPart > 0 ? (convertGroup(decPart.toString()) + 'สตางค์') : 'ถ้วน';
+    return text;
+  }
+
+  // ---------- Certificate form (ใบรับรองแทนใบเสร็จรับเงิน) ----------
+  const certRowsBody = document.getElementById('cert-rows');
+  const certAddRowBtn = document.getElementById('cert-add-row');
+  const certTotalText = document.getElementById('cert-total-text');
+  const certTotalNum = document.getElementById('cert-total-num');
+  const certPrintBtn = document.getElementById('cert-print-btn');
+
+  function addCertRow(){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="date" class="cert-date"></td>
+      <td><input type="text" class="cert-desc" placeholder="รายละเอียดรายจ่าย"></td>
+      <td><input type="number" class="cert-amount row-amount" min="0" step="0.01" placeholder="0.00"></td>
+      <td><input type="text" class="cert-note" placeholder=""></td>
+      <td><button type="button" class="cert-row-remove" title="ลบรายการ">&times;</button></td>
+    `;
+    certRowsBody.appendChild(tr);
+    tr.querySelector('.cert-amount').addEventListener('input', updateCertTotal);
+    tr.querySelector('.cert-row-remove').addEventListener('click', () => {
+      tr.remove();
+      updateCertTotal();
+    });
+  }
+
+  function updateCertTotal(){
+    const amounts = Array.from(document.querySelectorAll('.cert-amount'))
+      .map(el => parseFloat(el.value))
+      .filter(v => !isNaN(v));
+    const total = amounts.reduce((a, b) => a + b, 0);
+    certTotalNum.textContent = total.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    certTotalText.textContent = `( ${thaiBahtText(total)} )`;
+  }
+
+  certAddRowBtn.addEventListener('click', addCertRow);
+  // seed with 5 empty rows to start
+  for (let i = 0; i < 5; i++) addCertRow();
+  updateCertTotal();
+
+  function formatThaiDate(dateStr){
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d)) return dateStr;
+    const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+  }
+
+  function fillOrBlank(value, blankHtml){
+    const v = (value || '').toString().trim();
+    return v ? v : blankHtml;
+  }
+
+  certPrintBtn.addEventListener('click', () => {
+    const company = document.getElementById('cert-company').value.trim();
+    const payer = document.getElementById('cert-payer').value.trim();
+    const position = document.getElementById('cert-position').value.trim();
+    const dateFrom = document.getElementById('cert-date-from').value;
+    const dateTo = document.getElementById('cert-date-to').value;
+    const blank20 = '&nbsp;'.repeat(20);
+    const blank14 = '&nbsp;'.repeat(14);
+
+    document.getElementById('pc-company').innerHTML = fillOrBlank(company, blank20);
+    document.getElementById('pc-payer').innerHTML = fillOrBlank(payer, blank20);
+    document.getElementById('pc-position').innerHTML = fillOrBlank(position, blank14);
+    document.getElementById('pc-date-from').innerHTML = fillOrBlank(formatThaiDate(dateFrom), blank14);
+    document.getElementById('pc-date-to').innerHTML = fillOrBlank(formatThaiDate(dateTo), blank14);
+    document.getElementById('pc-total-text').textContent = certTotalText.textContent;
+    document.getElementById('pc-total-num').textContent = certTotalNum.textContent + ' บาท';
+
+    const rows = Array.from(document.querySelectorAll('#cert-rows tr'));
+    const pcRows = document.getElementById('pc-rows');
+    pcRows.innerHTML = '';
+    let rowsWithContent = 0;
+    rows.forEach(tr => {
+      const date = tr.querySelector('.cert-date').value;
+      const desc = tr.querySelector('.cert-desc').value.trim();
+      const amount = parseFloat(tr.querySelector('.cert-amount').value);
+      const note = tr.querySelector('.cert-note').value.trim();
+      const hasContent = date || desc || !isNaN(amount) || note;
+      if (hasContent) rowsWithContent++;
+      const trOut = document.createElement('tr');
+      trOut.innerHTML = `
+        <td>${date ? formatThaiDate(date) : ''}</td>
+        <td>${desc}</td>
+        <td class="amt">${!isNaN(amount) ? amount.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}) : ''}</td>
+        <td>${note}</td>
+      `;
+      pcRows.appendChild(trOut);
+    });
+    // pad with blank rows so the printed table has at least 8 lines
+    for (let i = rows.length; i < 8; i++){
+      const trOut = document.createElement('tr');
+      trOut.innerHTML = '<td>&nbsp;</td><td></td><td></td><td></td>';
+      pcRows.appendChild(trOut);
+    }
+
+    window.print();
   });
 </script>
 
